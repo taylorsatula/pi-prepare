@@ -10,12 +10,11 @@
     "@earendil-works/pi-tui": "*",
     "typebox": "*"
   },
+  "dependencies": {
+    "openai": "^6.26.0"
+  },
   "devDependencies": {
-    "@earendil-works/pi-ai": "^0.79.0",
-    "@earendil-works/pi-coding-agent": "^0.79.0",
-    "@earendil-works/pi-tui": "^0.79.0",
     "@types/node": "^24.0.0",
-    "typebox": "^1.0.58",
     "typescript": "^5.0.0"
   },
   "scripts": {
