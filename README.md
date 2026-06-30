@@ -35,7 +35,7 @@ During preparation, the agent operates in read-only mode:
 
 - **Allowed tools**: `read`, `bash` (allowlist-gated), `grep`, `find`, `ls`, `questionnaire`, `propose_completed_plan`
 - **Blocked**: `edit`, `write`, mutating bash commands (git mutations, npm install, sed -i, find -exec, curl -o, etc.)
-- **Bash safety gate**: Commands are validated against an allowlist with special handling for git, npm/pnpm/yarn, sed/awk, find, and curl/wget
+- **Bash safety gate**: Commands are validated against an allowlist with per-command subcommand checks for git, npm/pnpm/yarn, sed/awk, find/fd, and curl/wget. Unquoted command substitution (`$()`, `` ` ``) and output redirection to real files are also rejected.
 
 The agent should:
 1. Explore the codebase using read/grep/find/ls
@@ -58,8 +58,8 @@ After submission, the user sees four options:
 
 During execution, the agent has full editing capabilities:
 
-- **Allowed tools**: `read`, `bash`, `edit`, `write`, `plan_todo`
-- Progress is tracked via `plan_todo(action: "complete", stepId: "step-N")` after each step
+- **Allowed tools**: `read`, `bash`, `edit`, `write`, `plan_todo`, `questionnaire`
+- Progress is tracked via `plan_todo`: use `action: "list"` to review steps, `action: "complete"` with `stepId: "step-N"` to mark done, or `action: "cancel"` to abandon the plan
 - A HUD section displays the current step being executed
 - Status bar shows completion progress (e.g., `prepare 2/5`)
 
@@ -92,7 +92,7 @@ extensions/prepare/
 - **Tool swapping over blocking**: Instead of intercepting every tool call, the extension swaps active tools at phase boundaries — edit/write are removed during preparing, and propose_completed_plan/questionnaire are added back during executing.
 - **Structured plan parsing**: Plans are parsed from markdown using `### Step N — Title` headers with bullet fields (What, Files, Details, Acceptance Criteria, Dependencies). Falls back to a single catch-all step if no numbered steps are found.
 - **Clean workspace compaction**: When selected, the entire planning conversation is serialized and sent to the active model to generate a focused implementation dossier (relevant files, constraints, supporting context) that replaces all previous entries in the context window.
-- **Bash safety gate**: Allowlist-based command checking with granular subcommand rules for git (blocks mutating operations like commit/push/rebase), package managers (blocks install/add/remove), sed/awk (blocks -i), find (blocks -exec/-delete), and curl/wget (blocks writes).
+- **Bash safety gate**: Allowlist-based command checking with granular subcommand rules for git (blocks mutating operations like commit/push/rebase), package managers (blocks install/add/remove), sed/awk (blocks -i), find/fd (blocks -exec/-delete), and curl/wget (blocks writes). Unquoted command substitution and output redirection to real files are also rejected.
 
 ## Development
 
